@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "TempBare",
+    "slug": "TempBare",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
