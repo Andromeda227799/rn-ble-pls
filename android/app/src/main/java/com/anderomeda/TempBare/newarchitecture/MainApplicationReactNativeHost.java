@@ -1,4 +1,4 @@
-package com.tempbare.newarchitecture;
+package com.anderomeda.TempBare.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.EmptyReactNativeConfig;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.tempbare.BuildConfig;
-import com.tempbare.newarchitecture.components.MainComponentsRegistry;
-import com.tempbare.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.anderomeda.TempBare.BuildConfig;
+import com.anderomeda.TempBare.newarchitecture.components.MainComponentsRegistry;
+import com.anderomeda.TempBare.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

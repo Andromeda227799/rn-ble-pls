@@ -1,4 +1,4 @@
-package com.tempbare.newarchitecture.modules;
+package com.anderomeda.TempBare.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;

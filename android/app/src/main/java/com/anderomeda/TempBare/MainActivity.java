@@ -1,4 +1,4 @@
-package com.tempbare;
+package com.anderomeda.TempBare;
 
 import android.os.Build;
 import android.os.Bundle;
