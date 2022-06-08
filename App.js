@@ -1,16 +1,46 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  Button,
-  PermissionsAndroid,
-  StyleSheet,
-} from "react-native";
+import { View, Text, FlatList, Button, PermissionsAndroid } from "react-native";
 import { BleManager } from "react-native-ble-plx";
-// import { ApiCall } from "./api";
-
+import { Buffer } from "buffer";
 export const manager = new BleManager();
+
+const ALL_SERVICES = [
+  {
+    serviceID: 1,
+    serviceUUID: "00001800-0000-1000-8000-00805f9b34fb",
+    uuid: "00002a00-0000-1000-8000-00805f9b34fb",
+  },
+  {
+    serviceID: 1,
+    serviceUUID: "00001800-0000-1000-8000-00805f9b34fb",
+    uuid: "00002a01-0000-1000-8000-00805f9b34fb",
+  },
+  {
+    serviceID: 1,
+    serviceUUID: "00001800-0000-1000-8000-00805f9b34fb",
+    uuid: "00002a04-0000-1000-8000-00805f9b34fb",
+  },
+  {
+    serviceID: 5,
+    serviceUUID: "00001801-0000-1000-8000-00805f9b34fb",
+    uuid: "00002a05-0000-1000-8000-00805f9b34fb",
+  },
+  {
+    serviceID: 8,
+    serviceUUID: "0000ff00-0000-1000-8000-00805f9b34fb",
+    uuid: "0000ff01-0000-1000-8000-00805f9b34fb",
+  },
+  {
+    serviceID: 8,
+    serviceUUID: "0000ff00-0000-1000-8000-00805f9b34fb",
+    uuid: "0000ff02-0000-1000-8000-00805f9b34fb",
+  },
+  {
+    serviceID: 12,
+    serviceUUID: "00010203-0405-0607-0809-0a0b0c0d1912",
+    uuid: "00010203-0405-0607-0809-0a0b0c0d2b12",
+  },
+];
 
 const requestPermission = async () => {
   const granted = await PermissionsAndroid.request(
@@ -35,12 +65,11 @@ const App = () => {
   const [logCount, setLogCount] = useState(0);
   const [scannedDevices, setScannedDevices] = useState({});
   const [deviceCount, setDeviceCount] = useState(0);
-  // const { result } = ApiCall();
-  // console.log("APP PAGE", result);
+
   useEffect(() => {
     manager.onStateChange((state) => {
       const subscription = manager.onStateChange(async (state) => {
-        console.log("STATE ", state);
+        console.log(state);
         const newLogData = logData;
         newLogData.push(state);
         await setLogCount(newLogData.length);
@@ -116,104 +145,153 @@ const App = () => {
                   newScannedDevices[device.id] = device;
                   await setDeviceCount(Object.keys(newScannedDevices).length);
                   await setScannedDevices(scannedDevices);
+
                   if (device.name === "C60-E581") {
-                    console.log("DEVICE ID",device.id)
+                    console.log("DEVICE ID", device.id);
                     // Stop scanning as it's not necessary if you are scanning for one device.
                     manager.stopDeviceScan();
                     console.log("WHITE LABEL WATCH FOUND");
-                    manager.discoverAllServicesAndCharacteristicsForDevice("A4:C1:38:70:E5:81", null).then((res)=>{
-                      console.log("DEVICE CONNECTED WITH RES",res);
-                    }).catch((er)=>{
-                      console.log("FAILED CONNECTING",er);
-                    })
-                    await device
-                      .connect()
-                      .then((device) => {
-                        // console.log("DEVICE LOG 1",device)
-                        // console.log("DEVICE LOG 2",device.readCharacteristicForDevice(device.id,device.serviceUUIDs,null,1));
-                        
-                        // console.log("DEVICE LOG 2", device.discoverAllServicesAndCharacteristics());
-                        // manager. monitorCharacteristicForDevice(deviceIdentifier, serviceUUID, characteristicUUID, listener, transactionId)
-                        
+                    await device.connect();
+                    //   .then(device => {
+                    //     // this.info("Discovering services and characteristics")
+                    //     console.log(
+                    //       'Connected...Discovering services and characteristics',
+                    //     );
+                    //     return device.discoverAllServicesAndCharacteristics();
+                    //   })
+                    //   .then(device => {
+                    //     // Do work on device with services and characteristics
+                    //     console.log(
+                    //       'Services and characteristics discovered',
+                    //     );
+                    //     //return this.testChar(device)
+                    //     const services = device.services().then(res => {
+                    //       console.log(
+                    //         '🚀 ~ file: BluetoothScanner.js ~ line 138 ~ manager.startDeviceScan ~ services',
+                    //         services[0],
+                    //       );
+                    //     });
+                    //     console.log(services);
+                    //     services.forEach(async service => {
+                    //       const characteristics =
+                    //         await device.characteristicsForService(
+                    //           service.uuid,
+                    //         );
+                    //       characteristics.forEach(console.log);
+                    //     });
+                    //     return device.readCharacteristicForService(services);
+                    //     // device.readCharacteristicForService("abbaff00-e56a-484c-b832-8b17cf6cbfe8")
+                    //     // this.info("Setting notifications")
+                    //     //return this.setupNotifications(device)
+                    //   })
+                    //   .then(
+                    //     () => {
+                    //       const characteristicsData =
+                    //         device.readCharacteristicForService();
+                    //       console.log(characteristicsData);
 
-                        return device.discoverAllServicesAndCharacteristics();
-                      })
-                      .then((device) => {
-                        // console.log("ALL CONFIG LOGS", device);
-                        // Do work on device with services and characteristics
-                        return device.services();
-                      })
-                      .then((services) => {
-                        const temp = [];
-                        services.map((id) =>
-                          temp.push({
-                            uuid: id.uuid,
-                            id: id.id,
-                            char: id.characteristics(),
-                          })
-                        ); // 181d is Weight Scale -> org.bluetooth.service.weight_scale;
-                        return services[0].characteristics();
-                      })
-                      .then((temp) => {
-                        let arr = [];
-                        temp.map(async (item) => {
-                          arr.push(item.descriptors());
-                          // console.log(
-                          //   item.id,
-                          //   item.isReadable,
-                          //   item.descriptors(),
-                          //   item.deviceID,
-                          //   item.serviceID,
-                          //   item.serviceUUID,
-                          //   item.value
-                          // );
-                        });
-                      })
-                      .then((arr) => {
-                        console.log("ARR LOGS", arr);
-                      })
-                      .catch((error) => {
-                        // Handle errors
-                      });
-                    //  device.readCharacteristicForService()
-                    // await device
-                    //   .readCharacteristicForService(
-                    //     "00001800-0000-1000-8000-00805f9b34fb",
-                    //     "00002a01-0000-1000-8000-00805f9b34fb",
-                    //     "1"
-                    //   )
-                    //   .then((char) => {
-                    //     console.log(char.value);
-                    //   }).catch((error)=>console.log(error));
+                    //       //this.info("Listening...")
+                    //     },
+                    //     error => {
+                    //       console.log(
+                    //         '🚀 ~ file: BluetoothScanner.js ~ line 152 ~ manager.startDeviceScan ~ error',
+                    //         error,
+                    //       );
+                    //       // Handle errors
+                    //     },
+                    //   );
+                    await device.discoverAllServicesAndCharacteristics();
+                    const services = await device.services();
 
-                    // await device
-                    //   .readCharacteristicForService(
-                    //     "00001800-0000-1000-8000-00805f9b34fb",
-                    //     "00002a00-0000-1000-8000-00805f9b34fb",
-                    //     "1"
-                    //   )
-                    //   .then((char) => {
-                    //     console.log(char.value);
+                    // const characteristics = await services[1].characteristics();
+                    // console.log("Characteristics 0:", characteristics);
+                    // characteristics[0].monitor((err, update) => {
+                    //   if (err) {
+                    //     console.log(`characteristic error: ${err}`);
+                    //     console.log(JSON.stringify(err));
+                    //   } else {
+                    //     console.log(
+                    //       "Is Characteristics Readable:",
+                    //       update.isReadable
+                    //     );
+                    //     console.log(
+                    //       "Heart Rate Data:",
+                    //       base64.decode(update.value)
+                    //     );
+                    // const readCharacteristic = await device.readCharacteristicForService(userDataServiceUUID,
+                    // heightCharacteristicUUID); // assuming the device is already connected
+                    // var data = new Uint16Array(base64.decode(update.value));
+
+                    //     const heartRateData = Buffer.from(
+                    //       update.value,
+                    //       "base64"
+                    //     ).readUInt16LE(0);
+                    //     console.log("Heart Beats:", heartRateData);
+                    //   }
+                    // });
+
+                    // services.forEach(async (service) => {
+                    //   const characteristics =
+                    //     await device.characteristicsForService(service.uuid);
+                    //   characteristics.forEach((characteristics) => {
+                    //     console.log("ALL CHARS", characteristics);
                     //   });
-                    //   await device
-                    //   .readCharacteristicForService(
-                    //     "00001800-0000-1000-8000-00805f9b34fb",
-                    //     "00002a01-0000-1000-8000-00805f9b34fb",
-                    //     "1"
-                    //   )
-                    //   .then((char) => {
-                    //     console.log(char.value);
-                    //   });
-                    //   await device
-                    //   .readCharacteristicForService(
-                    //     "00001800-0000-1000-8000-00805f9b34fb",
-                    //     "00002a01-0000-1000-8000-00805f9b34fb",
-                    //     "1"
-                    //   )
-                    //   .then((char) => {
-                    //     console.log(char.value);
-                    //   });
-                    // device.readCharacteristicForService()
+                    // });
+
+                    ALL_SERVICES.forEach(async (item) => {
+                      const serviceUUID = item.serviceUUID;
+                      // "00001800-0000-1000-8000-00805f9b34fb";
+                      const charUUID = item.uuid;
+                      // "00002a04-0000-1000-8000-00805f9b34fb";
+
+                      const readCharacteristic =
+                        await device.readCharacteristicForService(
+                          serviceUUID,
+                          charUUID
+                        );
+                      // assuming the device is already connected
+                      // console.log(
+                      //   "🚀 ~ file: BluetoothScanner.js ~ line 297 ~ manager.startDeviceScan ~ readCharacteristic",
+                      //   readCharacteristic
+                      // );
+
+                      const readValueInBase64 = readCharacteristic.value;
+                      console.log(
+                        "🚀 ~ file: BluetoothScanner.js ~ line 303 ~ manager.startDeviceScan ~ readValueInBase64",
+                        readValueInBase64
+                      );
+
+                      const readValueInRawBytes = Buffer.from(
+                        readValueInBase64,
+                        "base64"
+                      ).readUInt16LE(0);
+                      console.log(
+                        "🚀 ~ file: BluetoothScanner.js ~ line 309 ~ manager.startDeviceScan ~ readValueInRawBytes",
+                        readValueInRawBytes
+                      );
+                    });
+
+                    // ALL_SERVICES.forEach((item) => {
+                    //   device.monitorCharacteristicForService(
+                    //     item.serviceUUID,
+                    //     item.uuid,
+                    //     (err, update) => {
+                    //       if (err) {
+                    //         console.log(`characteristic error: ${err}`);
+                    //         // console.log(JSON.stringify(err));
+                    //       } else {
+                    //         console.log(
+                    //           "Is Characteristics Readable:",
+                    //           update.isReadable
+                    //         );
+                    //         console.log(
+                    //           "Heart Rate Data:",
+                    //           base64.decode(update.value)
+                    //         );
+                    //       }
+                    //     }
+                    //   );
+                    // });
                   }
                 }
               });
@@ -227,12 +305,3 @@ const App = () => {
 };
 
 export default App;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
